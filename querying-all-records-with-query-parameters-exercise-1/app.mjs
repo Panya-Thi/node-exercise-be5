@@ -9,12 +9,11 @@ app.use(express.json());
 app.get("/movies", async (req, res) => {
 	try {
 		// แก้ไขโค้ดให้สามารถกรองผลลัพธ์ด้วย Parameter ได้ข้างล่างนี้ 🔽🔽🔽
-		const genresParam = null;
+		const genresParam = req.query.genres || null;
 		const result = await pool.query(
-			`
-    SELECT * FROM movies
-    `,
-			[]
+			`SELECT * FROM movies where (genres = $1 OR $1 is null or $1 ='')`,
+		[genresParam]
+    			
 		);
 		// แก้ไขโค้ดให้สามารถกรองผลลัพธ์ด้วย Parameter ได้ข้างบนนี้ 🔼🔼🔼
 
@@ -22,7 +21,7 @@ app.get("/movies", async (req, res) => {
 			data: result.rows,
 		});
 	} catch (e) {
-		return res.json({
+		return res.status(500).json({
 			message: "ไม่สามารถเชื่อมต่อ Database ได้",
 		});
 	}
